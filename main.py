@@ -1,28 +1,12 @@
 import json
 import requests
 import consts
-from fpdf import FPDF
+import os
+from fpdf import FPDF, HTMLMixin
 
-def txt_to_pdf(filename):
-    # save FPDF() class into
-    # a variable pdf
-    pdf = FPDF()
 
-    # Add a page
-    pdf.add_page()
-
-    # set style and size of font
-    # that you want in the pdf
-    pdf.set_font("Arial", size=15)
-
-    f = open(filename + ".txt", "r")
-
-    # insert the texts in pdf
-    for x in f:
-        pdf.cell(200, 10, txt=x, ln=1, align='C')
-
-    pdf.output(filename + ".pdf")
-    f.close()
+class MyFPDF(FPDF, HTMLMixin):
+    pass
 
 
 def user_name(userid):
@@ -78,19 +62,24 @@ def matchup_results(matchups):
 
 
 if __name__ == '__main__':
-    filename = 'week' + str(consts.WEEK()) + 'results'
-    with open(filename + ".txt", 'w') as f:
-        f.write(league_name())
-        f.write('\n')
-        f.write("*************************")
-        f.write('\n')
-        f.write(league_owners())
-        f.write('\n')
-        f.write("*************************")
-        f.write('\n')
-        f.write("Week " + str(consts.WEEK()))
-        f.write('\n')
-        f.write("*************************")
-        f.write('\n')
-        f.write('\n'.join(matchup_results(matchups())))
-    txt_to_pdf(filename)
+    filename = 'week' + str(consts.WEEK()) + 'results.pdf'
+    if os.path.exists(filename):
+        os.remove(filename)
+    pdf = MyFPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=15)
+    html = """
+            <h1><span><strong>""" + league_name() + """</strong></span></h1>
+            <hr/>
+            <p><em><span>""" + league_owners() + """</span></em></p>
+            <hr/>
+            <h2>Week """ + str(consts.WEEK()) + """ Results</h2>
+    """
+    results = matchup_results(matchups())
+    for i in range(0, len(results)):
+        if i % 3 == 0:
+            html += """<h3>""" + results[i] + """ </h3>"""
+        else:
+            html += """<p>""" + results[i] + """ </p>"""
+    pdf.write_html(html)
+    pdf.output(filename)
