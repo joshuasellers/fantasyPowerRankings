@@ -68,18 +68,19 @@ if __name__ == '__main__':
     pdf = MyFPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=15)
-    html = """
-            <h1><span><strong>""" + league_name() + """</strong></span></h1>
+    html_title_page = """
+            <h1>""" + league_name() + """</h1>
             <hr/>
-            <p><em><span>""" + league_owners() + """</span></em></p>
-            <hr/>
-            <h2>Week """ + str(consts.WEEK()) + """ Results</h2>
-    """
+            <p><i>""" + league_owners() + """</i></p>
+            """
+    pdf.write_html(html_title_page)
+    pdf.add_page()
+    html_body = """<h2>Week """ + str(consts.WEEK()) + """ Results</h2>"""
     results = matchup_results(matchups())
     for i in range(0, len(results)):
         if i % 3 == 0:
-            html += """<h3>""" + results[i] + """ </h3>"""
+            html_body += """<h3>""" + results[i] + """ </h3>"""
         else:
-            html += """<p>""" + results[i] + """ </p>"""
-    pdf.write_html(html)
+            html_body += """<p>""" + results[i] + """ </p>"""
+    pdf.write_html(html_body)
     pdf.output(filename)
