@@ -2,6 +2,7 @@ import json
 import requests
 import consts
 import os
+from operator import itemgetter
 from fpdf import FPDF, HTMLMixin
 
 
@@ -54,11 +55,36 @@ def matchup_results(matchups):
     mr = []
     for i in range(0, len(matchups)):
         mr.append("Matchup " + str(i+1))
-        mr.append(roster_id_to_owner(matchups[i][0]['roster_id']) +
-              " scored " + str("%.2f" % sum(matchups[i][0]['starters_points'])) + " points")
-        mr.append(roster_id_to_owner(matchups[i][1]['roster_id']) +
-              " scored " + str("%.2f" % sum(matchups[i][1]['starters_points'])) + " points")
+        if sum(matchups[i][0]['starters_points']) >= sum(matchups[i][1]['starters_points']):
+            mr.append(roster_id_to_owner(matchups[i][0]['roster_id'])
+                      + ": " + str("%.2f" % sum(matchups[i][0]['starters_points'])))
+            mr.append(roster_id_to_owner(matchups[i][1]['roster_id'])
+                      + ": " + str("%.2f" % sum(matchups[i][1]['starters_points'])))
+        else:
+            mr.append(roster_id_to_owner(matchups[i][1]['roster_id'])
+                      + ": " + str("%.2f" % sum(matchups[i][1]['starters_points'])))
+            mr.append(roster_id_to_owner(matchups[i][0]['roster_id'])
+                      + ": " + str("%.2f" % sum(matchups[i][0]['starters_points'])))
     return mr
+
+
+def league_results(results):
+    lr = []
+    for i in range(0, len(results)):
+        if i % 3 != 0:
+            record = [results[i].split(":")[0], 0, 0, 0]
+            score = float(results[i].split(":")[1])
+            for j in range(0,len(results)):
+                if i != j and j % 3 != 0:
+                    if score > float(results[j].split(":")[1]):
+                        record[1] = record[1] + 1
+                    elif score < float(results[j].split(":")[1]):
+                        record[2] = record[2] + 1
+                    else:
+                        record[3] = record[3] + 1
+            lr.append(record)
+    lr = sorted(lr, key=itemgetter(1), reverse=True)
+    return lr
 
 
 if __name__ == '__main__':
@@ -66,21 +92,30 @@ if __name__ == '__main__':
     if os.path.exists(filename):
         os.remove(filename)
     pdf = MyFPDF()
+
     pdf.add_page()
     pdf.set_font("Arial", size=15)
     html_title_page = """
             <h1>""" + league_name() + """</h1>
             <hr/>
-            <p><i>""" + league_owners() + """</i></p>
             """
     pdf.write_html(html_title_page)
+
     pdf.add_page()
-    html_body = """<h2>Week """ + str(consts.WEEK()) + """ Results</h2>"""
+    html_results = """<h2>Week """ + str(consts.WEEK()) + """ Results</h2>"""
     results = matchup_results(matchups())
     for i in range(0, len(results)):
         if i % 3 == 0:
-            html_body += """<h3>""" + results[i] + """ </h3>"""
+            html_results += """<h3>""" + results[i] + """ </h3>"""
         else:
-            html_body += """<p>""" + results[i] + """ </p>"""
-    pdf.write_html(html_body)
+            html_results += """<p>""" + results[i] + """ </p>"""
+    pdf.write_html(html_results)
+
+    pdf.add_page()
+    html_overall_matchups = """<h2>Week """ + str(consts.WEEK()) + """ League Matchup Record</h2>"""
+    lr = league_results(results)
+    for result in lr:
+        html_overall_matchups += """<p>""" + str(result[0]) + """: """ + str(result[1]) + """ - """ + str(result[2]) + """ - """ + str(result[3]) + """</p>"""
+    pdf.write_html(html_overall_matchups)
+
     pdf.output(filename)
