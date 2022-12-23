@@ -15,15 +15,14 @@ def txt_to_pdf(filename):
     # that you want in the pdf
     pdf.set_font("Arial", size=15)
 
-    # open the text file in read mode
-    f = open("myfile.txt", "r")
+    f = open(filename + ".txt", "r")
 
     # insert the texts in pdf
     for x in f:
         pdf.cell(200, 10, txt=x, ln=1, align='C')
 
-    # save the pdf with name .pdf
-    pdf.output("mygfg.pdf")
+    pdf.output(filename + ".pdf")
+    f.close()
 
 
 def user_name(userid):
@@ -79,7 +78,8 @@ def matchup_results(matchups):
 
 
 if __name__ == '__main__':
-    with open('week' + str(consts.WEEK()) + 'results.txt', 'w') as f:
+    filename = 'week' + str(consts.WEEK()) + 'results'
+    with open(filename + ".txt", 'w') as f:
         f.write(league_name())
         f.write('\n')
         f.write("*************************")
@@ -93,3 +93,4 @@ if __name__ == '__main__':
         f.write("*************************")
         f.write('\n')
         f.write('\n'.join(matchup_results(matchups())))
+    txt_to_pdf(filename)
