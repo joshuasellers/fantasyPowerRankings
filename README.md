@@ -6,7 +6,7 @@ This script will output a txt and pdf file for rankings
 
 
 TODO:
-1. Add in team names to stats in the PDF (I just have player names right now)
+1. Add in team names to stats in the PDF (I just have owner names right now)
 2. Add in lineup efficiency stat
 3. Add in a way to track league record over the season
 4. Add in graphs for things like points for for the whole season
