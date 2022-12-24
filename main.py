@@ -98,6 +98,7 @@ if __name__ == '__main__':
     html_title_page = """
             <h1>""" + league_name() + """</h1>
             <hr/>
+            <img src="images/bigL.png" width="104" height="71">
             """
     pdf.write_html(html_title_page)
 
