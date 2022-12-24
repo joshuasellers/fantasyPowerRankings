@@ -3,3 +3,11 @@ This script will output a txt and pdf file for rankings
 
 - It gives the matchups for the week
 - It shows how you would match up against the whole league
+
+
+TODO:
+1. Add in team names to stats in the PDF (I just have player names right now)
+2. Add in lineup efficiency stat
+3. Add in a way to track league record over the season
+4. Add in graphs for things like points for for the whole season
+5. Create way to power rank teams
