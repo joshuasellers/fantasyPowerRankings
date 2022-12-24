@@ -156,6 +156,8 @@ def create_docx(filename):
     results = matchup_results(matchups())
     for i in range(0, len(results)):
         if i % 3 == 0 and i != 0:
+            doc.add_paragraph("")
+        elif i == 0:
             pass
         else:
             doc.add_paragraph(results[i])
@@ -169,5 +171,5 @@ if __name__ == '__main__':
     filename = 'week' + str(consts.WEEK()) + 'results'
     if os.path.exists(filename):
         os.remove(filename)
-    create_pdf(filename)
+    # create_pdf(filename)
     create_docx(filename)
