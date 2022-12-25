@@ -3,15 +3,9 @@ import requests
 import consts
 import os
 from operator import itemgetter
-from fpdf import FPDF, HTMLMixin
-import emoji
 from docx import Document
 from docx.shared import Inches, Pt
 from docx2pdf import convert
-
-
-class MyFPDF(FPDF, HTMLMixin):
-    pass
 
 
 def user_name(userid):
@@ -112,40 +106,6 @@ def league_results(results):
             lr.append(record)
     lr = sorted(lr, key=itemgetter(1), reverse=True)
     return lr
-
-
-def create_pdf(filename):
-    pdf = MyFPDF()
-
-    pdf.add_font('Emoji', '', 'fonts/symbola-font/Symbola-AjYx.ttf')
-    pdf.add_page()
-    pdf.set_font("Emoji", size=15)
-    html_title_page = """
-                <h1>""" + league_name() + """</h1>
-                <hr/>
-                <img src="images/bigL.png" width="104" height="71">
-                """
-    pdf.write_html(html_title_page)
-
-    pdf.add_page()
-    html_results = """<h2>Week """ + str(consts.WEEK()) + """ Results</h2>"""
-    html_results += """<h3> Matchups </h3>"""
-    results = matchup_results(matchups())
-    for i in range(0, len(results)):
-        if i % 3 == 0 and i != 0:
-            html_results += "<br>"
-        elif i == 0:
-            pass
-        else:
-            html_results += """<p>""" + results[i] + """ </p>"""
-    pdf.write_html(html_results)
-    html_overall_matchups = """<h3>League Matchup Record</h3>"""
-    lr = league_results(results)
-    for result in lr:
-        html_overall_matchups += """<p>""" + str(result[0]) + """: """ + str(result[1]) + """ - """ + str(
-            result[2]) + """ - """ + str(result[3]) + """</p>"""
-    pdf.write_html(html_overall_matchups)
-    pdf.output(filename + '.pdf')
 
 
 def create_docx(filename):
