@@ -2,9 +2,7 @@
 venv/*
 __pycache__/*
 consts.py
-*.txt
 *.pdf
 images/*
-fonts/*
 *.docx
 .DS_STORE
