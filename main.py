@@ -37,8 +37,8 @@ def roster_id_to_owner(id):
             return user_name(team['owner_id'])
 
 
-def matchups():
-    response = requests.get("https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID() + "/matchups/" + consts.WEEK())
+def matchups(week):
+    response = requests.get("https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID() + "/matchups/" + str(week))
     json_response = json.loads(response.text)
     matchups = []
     for matchup in json_response:
@@ -108,16 +108,36 @@ def league_results(results):
     return lr
 
 
+def combine_records(weekly_records):
+    records = {}
+    for week in weekly_records:
+        for record in week:
+            if record[0] in records:
+                records[record[0]][0] += record[1]
+                records[record[0]][1] += record[2]
+                records[record[0]][2] += record[3]
+            else:
+                records[record[0]] = [record[1], record[2], record[3]]
+    unsorted_records = []
+    for owner in records:
+        unsorted_records.append([owner] + records[owner])
+    return sorted(unsorted_records, key=itemgetter(1), reverse=True)
+
+
 def create_docx(filename):
     doc = Document()
     style = doc.styles['Normal']
     style.paragraph_format.space_after = Pt(5)
+
+    # Title page
     doc.add_heading(league_name(), 0)
     doc.add_picture('images/bigL.png', width=Inches(1.25))
     doc.add_page_break()
+
+    # Week results
     doc.add_heading("Week " + str(consts.WEEK()) + " Results", 1)
     doc.add_heading("Matchups", 2)
-    results = matchup_results(matchups())
+    results = matchup_results(matchups(consts.WEEK()))
     for i in range(0, len(results)):
         if i % 3 == 0 and i != 0:
             doc.add_paragraph("")
@@ -129,6 +149,17 @@ def create_docx(filename):
     lr = league_results(results)
     for result in lr:
         doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + " - " + str(result[2]) + " - " + str(result[3]))
+
+    # To-date Results
+    doc.add_heading("Season-Long Metrics", 1)
+    doc.add_heading("League Matchup Record", 2)
+    weekly_records = []
+    for i in range(1, consts.WEEK()+1):
+        weekly_records.append(league_results(matchup_results(matchups(i))))
+    overall_matchups = combine_records(weekly_records)
+    for result in overall_matchups:
+        doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + " - " + str(result[2]) + " - " + str(result[3]))
+
     doc.save(filename)
 
 if __name__ == '__main__':
