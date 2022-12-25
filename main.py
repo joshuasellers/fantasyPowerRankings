@@ -5,6 +5,7 @@ import os
 from operator import itemgetter
 from fpdf import FPDF, HTMLMixin
 import emoji
+import docx
 from docx import Document
 from docx.shared import Inches
 
@@ -148,6 +149,8 @@ def create_pdf(filename):
 
 def create_docx(filename):
     doc = Document()
+    style = doc.styles['Normal']
+    style.paragraph_format.space_after = docx.shared.Pt(5)
     doc.add_heading(league_name(), 0)
     doc.add_picture('images/bigL.png', width=Inches(1.25))
     doc.add_page_break()
@@ -169,7 +172,9 @@ def create_docx(filename):
 
 if __name__ == '__main__':
     filename = 'week' + str(consts.WEEK()) + 'results'
-    if os.path.exists(filename):
-        os.remove(filename)
+    if os.path.exists(filename + '.docx'):
+        os.remove(filename + '.docx')
+    if os.path.exists(filename + '.pdf'):
+        os.remove(filename + '.pdf')
     # create_pdf(filename)
     create_docx(filename)
