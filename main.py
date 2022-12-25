@@ -1,11 +1,12 @@
 import json
 import requests
 import consts
-import os
+import glob, os
 from operator import itemgetter
 from docx import Document
 from docx.shared import Inches, Pt
 from docx2pdf import convert
+import time
 
 
 def user_name(userid):
@@ -148,7 +149,7 @@ def create_docx(filename):
     doc.add_heading("League Matchup Record", 2)
     lr = league_results(results)
     for result in lr:
-        doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + " - " + str(result[2]) + " - " + str(result[3]))
+        doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + "-" + str(result[2]) + "-" + str(result[3]))
 
     # To-date Results
     doc.add_heading("Season-Long Metrics", 1)
@@ -158,16 +159,21 @@ def create_docx(filename):
         weekly_records.append(league_results(matchup_results(matchups(i))))
     overall_matchups = combine_records(weekly_records)
     for result in overall_matchups:
-        doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + " - " + str(result[2]) + " - " + str(result[3]))
+        doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + "-" + str(result[2]) + "-" + str(result[3]))
 
     doc.save(filename)
 
 if __name__ == '__main__':
     filename = 'week' + str(consts.WEEK()) + 'results'
-    if os.path.exists(filename + '.docx'):
-        os.remove(filename + '.docx')
-    if os.path.exists(filename + '.pdf'):
-        os.remove(filename + '.pdf')
+    print("Removing any previous files")
+    for f in glob.glob("*.docx"):
+        os.remove(f)
+    for f in glob.glob("*.pdf"):
+        os.remove(f)
+    time.sleep(5)
+    print("Creating new docx file")
     create_docx(filename + '.docx')
+    time.sleep(2.5)
+    print("Converting new docx file to a PDF file")
     if os.path.exists(filename + '.docx'):
         convert(filename + '.docx')

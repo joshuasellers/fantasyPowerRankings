@@ -15,6 +15,5 @@ This script will output a txt and pdf file for rankings
 
 TODO:
 - Add in lineup efficiency stat
-- Add in a way to track league record over the season
 - Add in graphs for things like points for for the whole season
 - Create way to power rank teams
