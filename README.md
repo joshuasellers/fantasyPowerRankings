@@ -9,6 +9,5 @@ This script will output a docx and pdf file for rankings
   - https://python-docx.readthedocs.io/en/latest/
 
 TODO:
-- Add in lineup efficiency stat
 - Add in graphs for things like points for for the whole season
 - Create way to power rank teams

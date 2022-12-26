@@ -156,6 +156,11 @@ def create_docx(filename):
         doc.add_paragraph(team_name(roster[0]) + " (" + roster_id_to_owner(roster[0])
                           + "): " + "%.2f" % (100 * roster[1]/roster[2]) + "% - [" + "%.2f" % roster[1] + "/"
                           + "%.2f" % roster[2] + "]")
+    doc.add_paragraph("")
+    image_paragraph = doc.add_paragraph()
+    for i in range(0, 24):
+        run = image_paragraph.add_run()
+        run.add_picture('images/gunning.png', width=Inches(0.25))
 
     # To-date Results
     doc.add_heading("Season-Long Metrics", 1)
