@@ -6,3 +6,4 @@ consts.py
 images/*
 *.docx
 .DS_STORE
+*.json

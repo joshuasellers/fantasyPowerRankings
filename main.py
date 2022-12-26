@@ -150,6 +150,12 @@ def create_docx(filename):
     lr = league_results(results)
     for result in lr:
         doc.add_paragraph(str(result[0]) + ": " + str(result[1]) + "-" + str(result[2]) + "-" + str(result[3]))
+    doc.add_heading("Roster Efficiency", 2)
+    best_rosters = team_efficiencies()
+    for roster in best_rosters:
+        doc.add_paragraph(team_name(roster[0]) + " (" + roster_id_to_owner(roster[0])
+                          + "): " + "%.2f" % (100 * roster[1]/roster[2]) + "% - [" + "%.2f" % roster[1] + "/"
+                          + "%.2f" % roster[2] + "]")
 
     # To-date Results
     doc.add_heading("Season-Long Metrics", 1)
@@ -163,7 +169,62 @@ def create_docx(filename):
 
     doc.save(filename)
 
+
+def update_player_data():
+    response = requests.get("https://api.sleeper.app/v1/players/nfl")
+    if os.path.exists('player_data/player_data.txt'):
+        os.remove('player_data/player_data.txt')
+    with open('player_data/player_data.txt', 'w') as f:
+        f.write(response.text)
+
+
+def get_player_data():
+    if os.path.exists('player_data/player_data.txt'):
+        with open('player_data/player_data.txt', 'r') as f:
+            return json.load(f)
+
+
+def team_efficiencies():
+    data = get_player_data()
+    league_response = requests.get(
+        "https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID())
+    json_league_response = json.loads(league_response.text)
+    starting_roster = list(filter(lambda x: x != 'BN', json_league_response['roster_positions']))
+    matchups_response = requests.get(
+        "https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID() + "/matchups/" + str(consts.WEEK()))
+    json_matchups_response = json.loads(matchups_response.text)
+    best_rosters = []
+    for matchup in json_matchups_response:
+        optimal_roster = []
+        optimal_score = 0
+        for position in starting_roster:
+            max_points = 0
+            best_player = ''
+            for player in matchup['players_points']:
+                orf = [x[0] for x in optimal_roster if x[0] == player]
+                if player in orf:
+                    continue
+                if data[player]['position'] == position:
+                    if matchup['players_points'][player] >= max_points:
+                        max_points = matchup['players_points'][player]
+                        best_player = player
+                elif position == 'SUPER_FLEX':
+                    if matchup['players_points'][player] >= max_points:
+                        max_points = matchup['players_points'][player]
+                        best_player = player
+                elif position == 'FLEX' and data[player]['position'] != 'QB':
+                    if matchup['players_points'][player] >= max_points:
+                        max_points = matchup['players_points'][player]
+                        best_player = player
+            optimal_roster.append([best_player, position, max_points, data[best_player]['full_name']])
+            optimal_score += max_points
+        best_rosters.append([matchup['roster_id'], matchup['points'], optimal_score, optimal_roster,
+                             matchup['points']/optimal_score])
+    return sorted(best_rosters, key=itemgetter(4), reverse=True)
+
+
 if __name__ == '__main__':
+    # update_player_data() # call every once in a while to keep this up to date
     filename = 'week' + str(consts.WEEK()) + 'results'
     print("Removing any previous files")
     for f in glob.glob("*.docx"):
