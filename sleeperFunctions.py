@@ -11,15 +11,6 @@ def user_name(userid):
     return consts.OWNER_NAMES()[json_response['username']]
 
 
-def league_owners():
-    response = requests.get("https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID() + "/rosters")
-    json_response = json.loads(response.text)
-    owners = []
-    for team in json_response:
-        owners.append(user_name(team['owner_id']))
-    return ', '.join(owners)
-
-
 def league_name():
     response = requests.get("https://api.sleeper.app/v1/league/" + consts.LEAGUE_ID())
     json_response = json.loads(response.text)
