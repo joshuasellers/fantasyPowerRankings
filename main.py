@@ -7,7 +7,7 @@ import sleeperFunctions
 
 
 if __name__ == '__main__':
-    sleeperFunctions.update_player_data() # call every once in a while to keep this up to date
+    # sleeperFunctions.update_player_data() # call every once in a while to keep this up to date
     filename = 'week' + str(consts.WEEK()) + 'results'
     print("Removing any previous files")
     for f in glob.glob("*.docx"):
